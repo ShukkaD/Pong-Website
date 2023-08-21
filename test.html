@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    canvas {
+      display: block;
+      margin: auto;
+      background-color: black;
+    }
+  </style>
+</head>
+<body>
+<canvas id="pongCanvas" width="800" height="600"></canvas>
+
+<script>
+  const canvas = document.getElementById("pongCanvas");
+  const ctx = canvas.getContext("2d");
+
+  // Paddle settings
+  const paddleWidth = 10;
+  const paddleHeight = 100;
+  let leftPaddleY = canvas.height / 2 - paddleHeight / 2;
+  let rightPaddleY = canvas.height / 2 - paddleHeight / 2;
+  const paddleSpeed = 10;
+  let leftPaddleUpPressed = false;
+  let leftPaddleDownPressed = false;
+  let rightPaddleUpPressed = false;
+  let rightPaddleDownPressed = false;
+
+  // Ball settings
+  const ballSize = 10;
+  let ballX = canvas.width / 2;
+  let ballY = canvas.height / 2;
+  let ballSpeedX = 5;
+  let ballSpeedY = 2;
+
+  function draw() {
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw paddles
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, leftPaddleY, paddleWidth, paddleHeight);
+    ctx.fillRect(canvas.width - paddleWidth, rightPaddleY, paddleWidth, paddleHeight);
+
+    // Draw ball
+    ctx.beginPath();
+    ctx.arc(ballX, ballY, ballSize, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Move the ball
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    // Ball collision with top and bottom walls
+    if (ballY - ballSize < 0 || ballY + ballSize > canvas.height) {
+      ballSpeedY = -ballSpeedY;
+    }
+
+    // Ball collision with paddles
+    if (
+            (ballX - ballSize < paddleWidth && ballY > leftPaddleY && ballY < leftPaddleY + paddleHeight) ||
+            (ballX + ballSize > canvas.width - paddleWidth && ballY > rightPaddleY && ballY < rightPaddleY + paddleHeight)
+    ) {
+      ballSpeedX = -ballSpeedX;
+    }
+
+    // Game over if ball goes beyond paddles
+    if (ballX - ballSize < 0 || ballX + ballSize > canvas.width) {
+      // Reset ball position
+      ballX = canvas.width / 2;
+      ballY = canvas.height / 2;
+    }
+
+    // Update paddle positions based on key states
+    if (leftPaddleUpPressed && leftPaddleY > 0) {
+      leftPaddleY -= paddleSpeed;
+    }
+    if (leftPaddleDownPressed && leftPaddleY < canvas.height - paddleHeight) {
+      leftPaddleY += paddleSpeed;
+    }
+    if (rightPaddleUpPressed && rightPaddleY > 0) {
+      rightPaddleY -= paddleSpeed;
+    }
+    if (rightPaddleDownPressed && rightPaddleY < canvas.height - paddleHeight) {
+      rightPaddleY += paddleSpeed;
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  function handleKeyDown(e) {
+    // Player 1 controls
+    if (e.key === "w") {
+      leftPaddleUpPressed = true;
+    }
+    if (e.key === "s") {
+      leftPaddleDownPressed = true;
+    }
+
+    // Player 2 controls
+    if (e.key === "ArrowUp") {
+      rightPaddleUpPressed = true;
+    }
+    if (e.key === "ArrowDown") {
+      rightPaddleDownPressed = true;
+    }
+  }
+
+  function handleKeyUp(e) {
+    // Player 1 controls
+    if (e.key === "w") {
+      leftPaddleUpPressed = false;
+    }
+    if (e.key === "s") {
+      leftPaddleDownPressed = false;
+    }
+
+    // Player 2 controls
+    if (e.key === "ArrowUp") {
+      rightPaddleUpPressed = false;
+    }
+    if (e.key === "ArrowDown") {
+      rightPaddleDownPressed = false;
+    }
+  }
+
+  document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("keyup", handleKeyUp);
+
+  draw();
+</script>
+</body>
+</html>
